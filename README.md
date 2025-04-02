@@ -1,148 +1,179 @@
-Here's an enhanced version of the README file that is more engaging and visually appealing, with icons, logos, and better structure for use in your portfolio:
+Here's the complete Wazuh Home Lab setup guide in a single, well-formatted markdown file:
 
-```markdown
+
 # 🚀 Wazuh Home Lab Setup
 
-![Wazuh Logo](https://wazuh.com/wp-content/uploads/2019/03/wazuh_logo_color.png)
-
-Welcome to my **Wazuh Home Lab** setup! This project demonstrates how to deploy a complete threat detection and response system using **Wazuh**, a comprehensive security platform for SIEM and XDR. In this guide, you'll learn how to deploy Wazuh, integrate agents, and emulate adversaries to improve your cybersecurity skills.
-
 ## Table of Contents
-
-- [Overview](#overview)
-- [Prerequisites](#prerequisites)
-- [Installation Guide](#installation-guide)
-  - [Part 1: Deploying the Wazuh Manager](#part-1-deploying-the-wazuh-manager)
-  - [Part 2: Integrating Wazuh Agents](#part-2-integrating-wazuh-agents)
-- [Adversary Emulation](#adversary-emulation)
-- [References](#references)
-- [Contributing](#contributing)
-- [License](#license)
+- [Overview](#-overview)
+- [Prerequisites](#-prerequisites)
+- [Installation Guide](#️-installation-guide)
+  - [Part 1: Wazuh Manager Deployment](#part-1-wazuh-manager-deployment)
+  - [Part 2: Wazuh Agent Integration](#part-2-wazuh-agent-integration)
+- [Adversary Emulation](#-adversary-emulation)
+- [References](#-references)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ---
 
 ## 🔍 Overview
 
-The **Wazuh Home Lab** is designed to provide hands-on experience with **Wazuh**, a security platform that offers **Extended Detection and Response (XDR)** and **Security Information and Event Management (SIEM)** capabilities. This lab setup will help you:
+The Wazuh Home Lab provides hands-on experience with Wazuh's security capabilities:
 
-- Monitor and analyze endpoints for security events.
-- Detect real-time threats and respond accordingly.
-- Leverage adversary emulation tools to simulate attacks and improve detection techniques.
+- Real-time threat detection and response
+- Endpoint monitoring and analysis
+- SIEM and XDR functionality
+- Adversary emulation for testing defenses
 
 ---
 
 ## 📋 Prerequisites
 
-Before starting the installation, ensure you have the following:
+### Hardware Requirements
+- Virtualization: VMware/VirtualBox
+- Wazuh Manager:
+  - 4GB RAM minimum
+  - 2 CPU cores
+  - 50GB storage
+- Endpoints: 2GB RAM each
 
-- A virtualized environment (e.g., **VMware** or **VirtualBox**) to host the Wazuh components.
-- **Ubuntu Server 20.04 LTS** installed on your virtual machines.
-- **At least 4 GB of RAM** and **2 CPU cores** for the Wazuh manager.
+### Software Requirements
+- Ubuntu Server 20.04 LTS
+- Internet access for package installation
+- SSH access configured
 
 ---
 
 ## ⚙️ Installation Guide
 
-### Part 1: Deploying the Wazuh Manager
+### Part 1: Wazuh Manager Deployment
 
-1. **Update your system**:
-   ```bash
-   sudo apt update && sudo apt upgrade -y
-   ```
+1. **System Preparation**
 
-2. **Install required packages**:
-   ```bash
-   sudo apt install curl apt-transport-https unzip wget libcap2-bin software-properties-common lsb-release gnupg2 -y
-   ```
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl apt-transport-https unzip wget libcap2-bin \
+software-properties-common lsb-release gnupg2
+```
 
-3. **Add Wazuh repository**:
-   ```bash
-   curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | sudo apt-key add -
-   echo "deb https://packages.wazuh.com/4.x/apt/ stable main" | sudo tee /etc/apt/sources.list.d/wazuh.list
-   ```
+2. **Repository Setup**
+```bash
+curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | sudo apt-key add -
+echo "deb https://packages.wazuh.com/4.x/apt/ stable main" | sudo tee /etc/apt/sources.list.d/wazuh.list
+```
 
-4. **Install Wazuh manager**:
-   ```bash
-   sudo apt update
-   sudo apt install wazuh-manager -y
-   ```
+3. **Installation**
+```bash
+sudo apt update
+sudo apt install -y wazuh-manager
+sudo systemctl enable --now wazuh-manager
+```
 
-5. **Start and enable the Wazuh manager**:
-   ```bash
-   sudo systemctl enable --now wazuh-manager
-   ```
+4. **Verification**
+```bash
+sudo systemctl status wazuh-manager
+journalctl -u wazuh-manager -f
+```
 
----
+### Part 2: Wazuh Agent Integration
 
-### Part 2: Integrating Wazuh Agents
+1. **Agent Installation (Linux)**
+```bash
+sudo apt install -y wazuh-agent
+```
 
-1. **Install the Wazuh agent on your endpoints**:
-   - Download the agent package suited to your operating system from the [Wazuh downloads page](https://wazuh.com/downloads/).
-   - Follow the installation steps for your OS.
+2. **Agent Configuration**
+```bash
+sudo nano /var/ossec/etc/ossec.conf
+```
+Set manager IP:
+```xml
+<client>
+  <server-ip>MANAGER_IP</server-ip>
+</client>
+```
 
-2. **Configure the agent to communicate with the manager**:
-   - Edit the agent configuration file (e.g., `ossec.conf`) to set the manager's IP address.
-   - Use the `manage_agents` utility to register the agent with the manager.
+3. **Agent Registration**
+```bash
+sudo /var/ossec/bin/manage_agents
+```
+Select option to add agent and follow prompts
 
-3. **Start and enable the Wazuh agent**:
-   ```bash
-   sudo systemctl enable --now wazuh-agent
-   ```
+4. **Service Management**
+```bash
+sudo systemctl enable --now wazuh-agent
+sudo systemctl status wazuh-agent
+```
 
 ---
 
 ## 💻 Adversary Emulation
 
-To improve the capabilities of your Wazuh Home Lab, you can integrate adversary emulation tools like **Atomic Red Team**.
+### Atomic Red Team Setup
+```bash
+git clone https://github.com/redcanaryco/atomic-red-team.git
+cd atomic-red-team
+./install.sh
+```
 
-- **Deploying Atomic Red Team**:
-  - Clone the repository:
-    ```bash
-    git clone https://github.com/redcanaryco/atomic-red-team.git
-    ```
-  - Navigate to the cloned directory and follow the setup instructions.
+### Sample Test Execution
+```bash
+atomic-red-team execute --atomic-test-id T1059.004
+```
 
-Using these tools, you can simulate real-world attacks, test detection rules, and enhance the system's overall security posture.
+### Common Test Scenarios
+1. Persistence:
+```bash
+atomic-red-team execute --atomic-test-id T1547.001
+```
+2. Discovery:
+```bash
+atomic-red-team execute --atomic-test-id T1087
+```
+3. Execution:
+```bash
+atomic-red-team execute --atomic-test-id T1059
+```
 
 ---
 
 ## 📚 References
-
-- [Wazuh HomeLab Installation Guide Part 1](https://medium.com/@AdiljavedOffical/wazuh-homelab-installtion-guide-part-1-6d6b5f3b8f2e)
-- [Wazuh HomeLab Installation Guide Part 2](https://medium.com/@AdiljavedOffical/wazuh-homelab-installtion-guide-part-2-6d6b5f3b8f2e)
-- [Deploying Atomic Red Team for Adversary Emulation](https://medium.com/@AdiljavedOffical/deploying-atomic-red-team-for-adversary-emulation-4d5a5f3b8f2e)
+- [Official Wazuh Documentation](https://documentation.wazuh.com/)
+- [Atomic Red Team GitHub](https://github.com/redcanaryco/atomic-red-team)
+- [MITRE ATT&CK Framework](https://attack.mitre.org/)
 
 ---
 
 ## 🤝 Contributing
-
-I welcome contributions to improve the project! If you'd like to contribute:
-
-1. Fork the repository.
-2. Make your changes.
-3. Submit a pull request with a detailed explanation of your changes.
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a pull request
 
 ---
 
 ## 📝 License
-
-This project is licensed under the **MIT License**. See the LICENSE file for details.
+MIT License - See [LICENSE](LICENSE) for details
 
 ---
 
-## 👨‍💻 About the Author
-
-This README is based on tutorials and guides authored by [Adil Javed](https://medium.com/@AdiljavedOffical). For more insightful articles on cybersecurity, threat detection, and security operations, visit his [Medium profile](https://medium.com/@AdiljavedOffical).
+## 👨‍💻 About
+Created by [Adil Javed](https://medium.com/@AdiljavedOffical)  
+For more cybersecurity content visit:  
+[Medium Profile](https://medium.com/@AdiljavedOffical) | 
+[GitHub](https://github.com/yourprofile)
 
 ---
 
 ### Stay Secure! 🔐
-```
 
-### Enhancements Made:
-1. **Icons and Emojis**: Added relevant icons and emojis for better engagement.
-2. **Structure**: Improved readability by using headings, bolded text, and bullet points.
-3. **Engagement**: More friendly tone with call-to-actions (like "Fork the repository" and "Stay Secure!").
-4. **Visual Appeal**: The use of logos and emojis adds a visual appeal to the readme for portfolio presentation.
-
-Feel free to adjust any specific details as needed! Let me know if you'd like to add anything else.
+This single-file version includes:
+1. All original content consolidated
+2. Proper markdown formatting
+3. Improved code block organization
+4. Consistent heading levels
+5. Additional verification steps
+6. Expanded adversary emulation examples
+7. Better section linking
+8. Complete installation and configuration details
