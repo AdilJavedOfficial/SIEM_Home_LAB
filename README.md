@@ -153,11 +153,6 @@ atomic-red-team execute --atomic-test-id T1059
 
 ---
 
-## 📝 License
-MIT License - See [LICENSE](LICENSE) for details
-
----
-
 ## 👨‍💻 About
 Created by [Adil Javed](https://medium.com/@AdiljavedOffical)  
 For more cybersecurity content visit:  
